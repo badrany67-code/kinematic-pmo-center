@@ -22,7 +22,54 @@ USER_DB = {
         "company": "Parsons Corporation",
         "allowed_packages": ["King Salman Air Base Infrastructure"]
     }
+
+    
 }
+# --- ADVANCED PMO PROJECT CONTROLS INPUTS ---
+st.sidebar.markdown("### 📊 Live Delay Impact Variables")
+
+# Input for Engineering/Client delay factors
+client_delay_days = st.sidebar.slider(
+    "Client/PMC Design Approval Delays (Days)", 
+    min_value=0, max_value=60, value=14, step=1
+)
+
+# Input for Contractor/Fabricator throughput factors
+contractor_fabrication_shortfall = st.sidebar.slider(
+    "Workshop Fabrication Shortfall (Tons Behind Target)", 
+    min_value=0, max_value=500, value=120, step=10
+)
+
+# --- DYNAMIC LIABILITY CALCULATOR ENGINE ---
+total_impact_score = (client_delay_days * 5) + (contractor_fabrication_shortfall * 0.5)
+
+if total_impact_score > 0:
+    client_share = round(((client_delay_days * 5) / total_impact_score) * 100, 1)
+    contractor_share = round(100 - client_share, 1)
+else:
+    client_share, contractor_share = 0.0, 0.0
+
+# --- DATA EXPORT UTILITY ---
+report_data = {
+    "Project Parameter": [
+        "Kinematic Progress Index", "Schedule Variance", 
+        "PMC Design Delay Impact", "Fabrication Shortfall Impact",
+        "Client Liability Share", "Contractor Liability Share"
+    ],
+    "Value": [
+        "46.50%", "-18.50%", 
+        f"{client_delay_days} Days", f"{contractor_fabrication_shortfall} Tons",
+        f"{client_share}%", f"{contractor_share}%"
+    ]
+}
+df_report = pd.DataFrame(report_data)
+
+st.sidebar.download_button(
+    label="📥 Export Executive PMO Report (CSV)",
+    data=df_report.to_csv(index=False).encode('utf-8'),
+    file_name='Kinematic_PMO_Claims_Guard_Report.csv',
+    mime='text/csv',
+)
 
 def check_login(username, password):
     if username in USER_DB:
@@ -156,7 +203,7 @@ with col_intelligence:
     if variance >= 0:
         st.info("⚖️ **Claims Ledger:** Package currently tracking on or ahead of schedule. No active claim exposure recorded.")
     else:
-        st.error(f"⚖️ **Delay Liability Split:** Client/PMC Delay Exposure (Design/Approvals): **{client_liability:.1f}%** | Contractor Liability (Workshop Throughput): **{contractor_liability:.1f}%**")
+        st.error(f"⚖️ **Delay Liability Split (Live Simulation):** Client/PMC Delay Exposure (Design/Approvals): **{client_share}%** | Contractor Liability (Workshop Throughput): **{contractor_share}%**")
         st.caption("Verifiable data log designed to defend against liquidated damages or substantiate formal Extension of Time (EOT) metrics.")
 
     st.markdown("---")
