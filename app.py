@@ -8,17 +8,17 @@ from datetime import datetime
 # --- SECURITY ENGINE: MULTI-TENANT AUTHENTICATION ---
 USER_DB = {
     "aecom_user": {
-        "password_hash": hashlib.sha256("AecomKsa2026!".encode()).hexdigest(),
+        "password_hash": hashlib.sha256(st.secrets["credentials"]["aecom_user"].encode()).hexdigest(),
         "company": "AECOM Middle East",
         "allowed_packages": ["King Khalid International Airport Expansion"]
     },
     "wsp_user": {
-        "password_hash": hashlib.sha256("WspRiyadh2026!".encode()).hexdigest(),
+        "password_hash": hashlib.sha256(st.secrets["credentials"]["wsp_user"].encode()).hexdigest(),
         "company": "WSP Infrastructure",
         "allowed_packages": ["Riyadh BRT Stations"]
     },
     "parsons_user": {
-        "password_hash": hashlib.sha256("ParsonsDefense2026!".encode()).hexdigest(),
+        "password_hash": hashlib.sha256(st.secrets["credentials"]["parsons_user"].encode()).hexdigest(),
         "company": "Parsons Corporation",
         "allowed_packages": ["King Salman Air Base Infrastructure"]
     }
